@@ -1,7 +1,16 @@
 from fastapi import FastAPI
+from backend.app.database import engine, Base
+from backend.app.models.member import Member, Membership, Credit
 
-app = FastAPI()
+# 1. Crear la instancia de FastAPI
+app = FastAPI(title="CLUB360 API")
 
+# 2. Crear las tablas en la base de datos (Ejecuta al arrancar)
+print("Conectando con Supabase y sincronizando tablas...")
+Base.metadata.create_all(bind=engine)
+print("¡Tablas 'members', 'memberships' y 'credits' verificadas/creadas!")
+
+# 3. Endpoints (Tus rutas)
 @app.get("/")
 def home():
     return {"mensaje": "¡Bienvenido al backend de CLUB360!"}
