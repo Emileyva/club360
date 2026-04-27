@@ -4,22 +4,30 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-# Carga la URL desde el .env (en local) o desde Vercel (en la nube)
+# 1. Carga la URL desde el .env (local) o las Variables de Entorno (Vercel)
 load_dotenv()
 
-# Usamos getenv para que sea dinámico y seguro
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
 
-# Si por alguna razón no la encuentra, esto evitará que el código rompa silenciosamente
 if not SQLALCHEMY_DATABASE_URL:
     raise ValueError("No se encontró la variable SQLALCHEMY_DATABASE_URL")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# 2. Configuración optimizada para Vercel (Serverless)
+# pool_pre_ping: verifica que la conexión siga viva antes de usarla
+# pool_size: limita cuántas conexiones mantiene abiertas cada instancia
+# max_overflow: evita que se creen conexiones infinitas en picos de tráfico
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=0
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-# Función para obtener la BD en cada petición
+# 3. Dependencia para obtener la sesión de base de datos
 def get_db():
     db = SessionLocal()
     try:
