@@ -22,3 +22,4 @@ def estado():
         "horario": "08:00 a 22:00 hs",
         "actividades": ["Fútbol", "Básquet", "Vóley", "Pádel"]
     }
+app = app

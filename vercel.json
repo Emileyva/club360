@@ -1,0 +1,16 @@
+//archivo para que vercel sepa donde esta el punto de entrada del proyecto
+
+{
+  "builds": [
+    {
+      "src": "backend/app/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/app/main.py"
+    }
+  ]
+}

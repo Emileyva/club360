@@ -4,10 +4,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-load_dotenv() # Carga la URL desde el .env
+# Carga la URL desde el .env (en local) o desde Vercel (en la nube)
+load_dotenv()
 
-# Reemplazo directo para forzar la creación hoy
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:club360bd2026@db.lvmhuwoqaxmvrhxuevdn.supabase.co:5432/postgres"
+# Usamos getenv para que sea dinámico y seguro
+SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
+
+# Si por alguna razón no la encuentra, esto evitará que el código rompa silenciosamente
+if not SQLALCHEMY_DATABASE_URL:
+    raise ValueError("No se encontró la variable SQLALCHEMY_DATABASE_URL")
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
