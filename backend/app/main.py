@@ -7,7 +7,7 @@ app = FastAPI(title="CLUB360 API")
 
 # 2. Crear las tablas en la base de datos (Ejecuta al arrancar)
 print("Conectando con Supabase y sincronizando tablas...")
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 print("¡Tablas 'members', 'memberships' y 'credits' verificadas/creadas!")
 
 # 3. Endpoints (Tus rutas)
