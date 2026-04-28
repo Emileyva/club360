@@ -31,7 +31,6 @@ packaging==26.2
 passlib==1.7.4
 postgrest==2.29.0
 propcache==0.4.1
-psycopg2==2.9.12
 psycopg2-binary==2.9.12
 pyasn1==0.6.3
 pycparser==3.0
