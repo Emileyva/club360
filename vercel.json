@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/app/main.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     },
     {
@@ -15,21 +15,20 @@
   ],
   "routes": [
     {
-      "src": "/auth/(.*)",
-      "dest": "backend/app/main.py"
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
     },
     {
       "src": "/assets/(.*)",
-      "dest": "frontend/dist/assets/$1"
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|ico|png|svg|woff2?))",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "frontend/dist/$1",
-      "check": true
-    },
-    {
-      "src": "/.*",
-      "dest": "frontend/dist/index.html"
+      "dest": "/index.html"
     }
   ]
 }

@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
+
+
 # 1. Carga la URL desde el .env (local) o las Variables de Entorno (Vercel)
 load_dotenv()
 

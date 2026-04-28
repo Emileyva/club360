@@ -47,8 +47,7 @@ const enviarRegistro = async () => {
   mensaje.value = ''
 
   try {
-    // IMPORTANTE: Asegurate que el backend esté corriendo en el puerto 8000
-    const res = await axios.post('http://127.0.0.1:8000/auth/register', usuario.value)
+   const res = await axios.post('/api/auth/register', usuario.value)
 
     esError.value = false
     mensaje.value = `¡Bienvenido ${res.data.first_name}! Ya podés iniciar sesión.`

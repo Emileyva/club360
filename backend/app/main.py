@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.database import engine, Base
-from backend.app.models.member import Member, Membership, Credit
-from backend.app.routes import auth
+from app.database import engine, Base
+from app.models.member import Member, Membership, Credit
+from app.routes import auth
 
 
 # 1. Crear la instancia de FastAPI
