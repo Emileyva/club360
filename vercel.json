@@ -1,15 +1,18 @@
-
 {
-  "builds": [
+  "version": 2,
+  "rewrites": [
     {
-      "src": "backend/app/main.py",
-      "use": "@vercel/python"
+      "source": "/auth/(.*)",
+      "destination": "/backend/app/main.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "backend/app/main.py"
+  "functions": {
+    "backend/app/main.py": {
+      "runtime": "vercel-python@0.22.1"
     }
-  ]
+  }
 }
