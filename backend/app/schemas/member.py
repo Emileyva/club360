@@ -31,18 +31,14 @@ class MemberCreate(BaseModel):
     last_name: str = Field(..., min_length=2)
     dni: str = Field(..., min_length=7, max_length=10)
     email: EmailStr
-    initial_memberships: List[MembershipType]
+    password: str
 
 # Es lo que el servidor le responde al cliente.
 class MemberResponse(BaseModel):
-    id: int
+    id_member: int
     first_name: str
     last_name: str
-    dni: str
-    email: EmailStr
-    is_suspended: bool
-    memberships: List[MembershipSchema]
-    credits: List[CreditSchema]
+    email: str
 
     class Config:
         from_attributes = True

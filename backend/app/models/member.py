@@ -17,7 +17,7 @@ class Member(Base):
     last_name = Column(String, nullable=False)
     dni = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-
+    hashed_password = Column(String, nullable=False)
     is_suspended = Column(Boolean, default=False)
 
     # Relación: Un miembro puede tener varias membresías

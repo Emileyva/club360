@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from backend.app.database import engine, Base
 from backend.app.models.member import Member, Membership, Credit
+from backend.app.routes import auth
+
 
 # 1. Crear la instancia de FastAPI
 app = FastAPI(title="CLUB360 API")
@@ -22,4 +24,6 @@ def estado():
         "horario": "08:00 a 22:00 hs",
         "actividades": ["Fútbol", "Básquet", "Vóley", "Pádel"]
     }
+
+app.include_router(auth.router)
 app = app
