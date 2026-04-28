@@ -1,33 +1,18 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "backend/app/main.py",
-      "use": "@vercel/python"
+      "source": "/auth/(.*)",
+      "destination": "/backend/app/main.py"
     },
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
     }
   ],
-  "routes": [
-    {
-      "src": "/auth/(.*)",
-      "dest": "backend/app/main.py"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "frontend/dist/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/dist/$1",
-      "check": true
-    },
-    {
-      "src": "/.*",
-      "dest": "frontend/dist/index.html"
+  "functions": {
+    "backend/app/main.py": {
+      "runtime": "vercel-python@0.22.1"
     }
-  ]
+  }
 }
