@@ -11,14 +11,23 @@
       "config": { "distDir": "dist" }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/auth/(.*)",
-      "destination": "backend/app/main.py"
+      "src": "/auth/(.*)",
+      "dest": "backend/app/main.py"
     },
     {
-      "source": "/(.*)",
-      "destination": "frontend/$1"
+      "src": "/assets/(.*)",
+      "dest": "frontend/dist/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/dist/$1",
+      "check": true
+    },
+    {
+      "src": "/.*",
+      "dest": "frontend/dist/index.html"
     }
   ]
 }
