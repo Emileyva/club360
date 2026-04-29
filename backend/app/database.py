@@ -19,10 +19,18 @@ _SessionLocal = None
 
 
 def _get_database_url() -> Optional[str]:
-    # Primary (current project)
-    url = os.getenv("SQLALCHEMY_DATABASE_URL")
-    # Common fallback name
-    return url or os.getenv("DATABASE_URL")
+    # Prefer the exact variables that Vercel's Supabase integration provides.
+    for env_name in (
+        "POSTGRES_URL_NON_POOLING",
+        "POSTGRES_URL",
+        "POSTGRES_PRISMA_URL",
+        "SQLALCHEMY_DATABASE_URL",
+        "DATABASE_URL",
+    ):
+        url = os.getenv(env_name)
+        if url:
+            return url
+    return None
 
 
 def _normalize_database_url(database_url: str) -> str:
@@ -66,7 +74,7 @@ def get_engine():
         # Do NOT crash at import time (important for serverless cold starts).
         # Raise only when DB is actually used.
         raise RuntimeError(
-            "Missing database URL env var. Set SQLALCHEMY_DATABASE_URL (or DATABASE_URL)."
+            "Missing database URL env var. Set POSTGRES_URL_NON_POOLING (or POSTGRES_URL, POSTGRES_PRISMA_URL, SQLALCHEMY_DATABASE_URL, DATABASE_URL)."
         )
 
     database_url = _normalize_database_url(database_url)
@@ -96,6 +104,9 @@ def get_engine():
             engine_kwargs["connect_args"] = connect_args
 
         _engine = create_engine(database_url, **engine_kwargs)
+        # Ensure the database schema exists before the first write.
+        # This is safe to run repeatedly and keeps fresh Vercel deploys working.
+        Base.metadata.create_all(bind=_engine)
     except Exception as exc:
         # Avoid leaking the full URL, but still provide useful diagnostics.
         raise RuntimeError(
