@@ -2,6 +2,7 @@ import os
 from typing import Optional
 
 from dotenv import load_dotenv
+from fastapi import HTTPException, status
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -49,7 +50,13 @@ def get_engine():
 def get_db():
     global _SessionLocal
     if _SessionLocal is None:
-        get_engine()
+        try:
+            get_engine()
+        except RuntimeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=str(exc),
+            )
 
     db = _SessionLocal()
     try:
