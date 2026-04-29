@@ -4,6 +4,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
@@ -23,6 +24,13 @@ def _get_database_url() -> Optional[str]:
     return url or os.getenv("DATABASE_URL")
 
 
+def _normalize_database_url(database_url: str) -> str:
+    # Supabase/Heroku style URLs sometimes use postgres:// which SQLAlchemy 2 may reject.
+    if database_url.startswith("postgres://"):
+        return "postgresql://" + database_url[len("postgres://") :]
+    return database_url
+
+
 def get_engine():
     global _engine, _SessionLocal
 
@@ -37,12 +45,25 @@ def get_engine():
             "Missing database URL env var. Set SQLALCHEMY_DATABASE_URL (or DATABASE_URL)."
         )
 
-    _engine = create_engine(
-        database_url,
-        pool_pre_ping=True,
-        pool_size=5,
-        max_overflow=0,
-    )
+    database_url = _normalize_database_url(database_url)
+
+    try:
+        engine_kwargs = {"pool_pre_ping": True}
+
+        # Serverless: avoid long-lived pools / connection storms.
+        if os.getenv("VERCEL"):
+            engine_kwargs["poolclass"] = NullPool
+        else:
+            engine_kwargs["pool_size"] = 5
+            engine_kwargs["max_overflow"] = 0
+
+        _engine = create_engine(database_url, **engine_kwargs)
+    except Exception as exc:
+        # Avoid leaking the full URL, but still provide useful diagnostics.
+        raise RuntimeError(
+            f"Database engine init failed: {exc.__class__.__name__}: {exc}"
+        ) from exc
+
     _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
     return _engine
 
