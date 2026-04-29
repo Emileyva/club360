@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import get_engine
 from app.models.member import Member, Membership, Credit
 from app.routes import auth
 
@@ -15,9 +14,6 @@ app.add_middleware(# 2. Configuración de CORS
     allow_methods=["*"], # Permite POST, GET, OPTIONS, etc.
     allow_headers=["*"], # Permite todos los headers
 )
-
-@app.on_event("startup")
-    pass  # Removed the startup hook for creating tables
 
 # 3. Endpoints (Tus rutas)
 @app.get("/")
