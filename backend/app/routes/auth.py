@@ -47,5 +47,5 @@ def register_member(member_data: MemberCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Database operation failed: {exc.__class__.__name__}: {str(exc)[:200]}",
+            detail=f"Database operation failed: {exc.__class__.__name__}: {str(exc)[:700]}",
         )

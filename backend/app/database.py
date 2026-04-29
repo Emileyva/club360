@@ -74,7 +74,7 @@ def get_engine():
 
     try:
         engine_kwargs = {"pool_pre_ping": True}
-        connect_args = {}
+        connect_args = {"connect_timeout": 10}
 
         parsed = urlparse(database_url)
         query = parse_qs(parsed.query)
