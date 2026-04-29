@@ -32,6 +32,29 @@ def _normalize_database_url(database_url: str) -> str:
     return database_url
 
 
+def _validate_database_url(database_url: str) -> None:
+    parsed = urlparse(database_url)
+
+    # Basic sanity checks so misconfigured env vars fail fast with a useful message.
+    if not parsed.scheme or "://" not in database_url:
+        raise RuntimeError(
+            "Invalid database URL: missing scheme. Expected something like "
+            "postgresql://user:pass@host:5432/dbname"
+        )
+
+    # Accept common SQLAlchemy postgres dialect schemes.
+    if not parsed.scheme.startswith("postgres"):
+        raise RuntimeError(
+            f"Invalid database URL scheme '{parsed.scheme}'. Expected a postgres URL."
+        )
+
+    if not parsed.hostname:
+        raise RuntimeError(
+            "Invalid database URL: missing hostname. Expected something like "
+            "postgresql://user:pass@host:5432/dbname"
+        )
+
+
 def get_engine():
     global _engine, _SessionLocal
 
@@ -47,6 +70,7 @@ def get_engine():
         )
 
     database_url = _normalize_database_url(database_url)
+    _validate_database_url(database_url)
 
     try:
         engine_kwargs = {"pool_pre_ping": True}
