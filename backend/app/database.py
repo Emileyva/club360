@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
@@ -49,6 +50,16 @@ def get_engine():
 
     try:
         engine_kwargs = {"pool_pre_ping": True}
+        connect_args = {}
+
+        parsed = urlparse(database_url)
+        query = parse_qs(parsed.query)
+        host = (parsed.hostname or "").lower()
+
+        # Supabase typically requires SSL. Prefer connect_args so the URL env var can stay clean.
+        if os.getenv("VERCEL") and host and host not in {"localhost", "127.0.0.1"}:
+            if "sslmode" not in query:
+                connect_args["sslmode"] = "require"
 
         # Serverless: avoid long-lived pools / connection storms.
         if os.getenv("VERCEL"):
@@ -56,6 +67,9 @@ def get_engine():
         else:
             engine_kwargs["pool_size"] = 5
             engine_kwargs["max_overflow"] = 0
+
+        if connect_args:
+            engine_kwargs["connect_args"] = connect_args
 
         _engine = create_engine(database_url, **engine_kwargs)
     except Exception as exc:
