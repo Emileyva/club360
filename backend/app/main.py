@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from app.database import Base
 from app.models.member import Member, Membership, Credit
 from app.routes import auth
 

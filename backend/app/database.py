@@ -1,37 +1,57 @@
-import os 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import os
+from typing import Optional
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-
-# 1. Carga la URL desde el .env (local) o las Variables de Entorno (Vercel)
+# Load environment from local dev files (Vercel uses Environment Variables).
 load_dotenv()
-
-SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
-
-if not SQLALCHEMY_DATABASE_URL:
-    raise ValueError("No se encontró la variable SQLALCHEMY_DATABASE_URL")
-
-# 2. Configuración optimizada para Vercel (Serverless)
-# pool_pre_ping: verifica que la conexión siga viva antes de usarla
-# pool_size: limita cuántas conexiones mantiene abiertas cada instancia
-# max_overflow: evita que se creen conexiones infinitas en picos de tráfico
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=0
-)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-# 3. Dependencia para obtener la sesión de base de datos
+_engine = None
+_SessionLocal = None
+
+
+def _get_database_url() -> Optional[str]:
+    # Primary (current project)
+    url = os.getenv("SQLALCHEMY_DATABASE_URL")
+    # Common fallback name
+    return url or os.getenv("DATABASE_URL")
+
+
+def get_engine():
+    global _engine, _SessionLocal
+
+    if _engine is not None:
+        return _engine
+
+    database_url = _get_database_url()
+    if not database_url:
+        # Do NOT crash at import time (important for serverless cold starts).
+        # Raise only when DB is actually used.
+        raise RuntimeError(
+            "Missing database URL env var. Set SQLALCHEMY_DATABASE_URL (or DATABASE_URL)."
+        )
+
+    _engine = create_engine(
+        database_url,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=0,
+    )
+    _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+    return _engine
+
+
 def get_db():
-    db = SessionLocal()
+    global _SessionLocal
+    if _SessionLocal is None:
+        get_engine()
+
+    db = _SessionLocal()
     try:
         yield db
     finally:
